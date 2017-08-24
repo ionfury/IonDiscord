@@ -15,5 +15,8 @@
   "bugs": {
     "url": "https://github.com/ionfury/IonDiscord/issues"
   },
-  "homepage": "https://github.com/ionfury/IonDiscord#readme"
+  "homepage": "https://github.com/ionfury/IonDiscord#readme",
+  "dependencies": {
+    "discord.js": "^11.1.0"
+  }
 }
