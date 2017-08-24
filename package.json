@@ -1,0 +1,19 @@
+{
+  "name": "ion-discord",
+  "version": "1.0.0",
+  "description": "A basic dicord bot to manage roles for EVE Online corps.",
+  "main": "app.js",
+  "scripts": {
+    "test": "test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ionfury/IonDiscord.git"
+  },
+  "author": "ionfury@gmail.com",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/ionfury/IonDiscord/issues"
+  },
+  "homepage": "https://github.com/ionfury/IonDiscord#readme"
+}
