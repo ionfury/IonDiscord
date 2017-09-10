@@ -1,0 +1,31 @@
+{ 
+  "verify_url": "https://login.eveonline.com/oauth/token",
+  "verify_params": [
+    {
+      "parameter": "grant_type",
+      "value": "authorization_code"
+    }
+  ],
+  "token"  : "MzUwMjkyNDI3NDA5NTg4MjI1.DJWtEQ.9gIkAMoor_L9cbmfcOQaJDdnGQY", 
+  "prefix" : "!",
+  "game" : "EVE Online",
+  "client_id" : "2c76df7cec724a85acf6f0ced3f55a45",
+  "client_secret" : "9ffLkMmgWMVJ7FnOOhEykm0HdGY2KsBBMhp9hMW9",
+  "role_mappings" : {
+    "corp" : [
+      {
+        "corporation_id": 1091440439,
+        "role_name": "SUAD"
+      }
+    ],
+    "alliance" : [
+      {
+        "alliance_id" : 498125261,
+        "role_name": "TEST"
+      }
+    ],
+    "default": "PUBLIC"
+  },
+  "welcome_channel": "landing_channel",
+  "bot_admin_role": "BotAdmin"
+}
