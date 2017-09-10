@@ -1,81 +1,85 @@
-
 const Discord = require("discord.js");
-const config = require("./config.json");
-const request=require('request');
-const http = require('http');
+const Config = require("./config.json");
+const Request = require('request');
+const Http = require('http');
 const MongoClient = require('mongodb').MongoClient;
-const client = new Discord.Client();
-const authString = '!auth';
-const esi = require('eve-swagger');
+const Client = new Discord.Client();
+const ESI = require('eve-swagger');
 var db;
 
-MongoClient.connect(`mongodb://${config.database_username}:${config.database_password}@ds159050.mlab.com:59050/iondiscord`, (err, database) => {
+MongoClient.connect(`mongodb://${Config.database_username}:${Config.database_password}@ds159050.mlab.com:59050/iondiscord`, (err, database) => {
   if (err) return console.log(err)
   db = database
 });
 
-
-client.on('ready', () => {
+Client.on('ready', () => {
   if(db === undefined){
     throw new Error("WARNING! Unable to connect to the database!  Shutting down!")
   }
 
-  console.log(`\nBot has started, with ${client.users.size} users, in ${client.channels.size} channels of ${client.guilds.size} guilds.`); 
+  console.log(`\nBot has started, with ${Client.users.size} users, in ${Client.channels.size} channels of ${Client.guilds.size} guilds.`); 
 
-  client.user.setGame(config.game);
+  Client.user.setGame(Config.game);
 });
 
-client.on('guildCreate', guild => {
+Client.on('guildCreate', guild => {
   console.log(`\nNew guild joined: ${guild.name} (id: ${guild.id}). This guild has ${guild.memberCount} members!`);
-  client.user.setGame(config.game);
+  Client.user.setGame(Config.game);
 });
 
-client.on('guildDelete', guild => {
+Client.on('guildDelete', guild => {
   console.log(`\nNew guild joined: ${guild.name} (id: ${guild.id}). This guild has ${guild.memberCount} members!`);
-  client.user.setGame(config.game);
+  Client.user.setGame(Config.game);
 });
 
-client.on("guildMemberAdd", member => {
+Client.on("guildMemberAdd", member => {
   var guild = member.guild;
   var channel = guild.channels.find(x => x.name === "landing_channel");
   channel.send(`Welcome ${member.user.username}, type !auth to begin.`);
 });
 
-client.on('message', msg => {
+Client.on('message', msg => {
   if(msg.author.bot) return;
-  if(msg.content.indexOf(config.prefix) !== 0) return;
+  if(msg.content.indexOf(Config.prefix) !== 0) return;
 
-  var args = msg.content.slice(config.prefix.length).trim().split(/ +/g);
+  var args = msg.content.slice(Config.prefix.length).trim().split(/ +/g);
   var command = args.shift().toLowerCase();
   console.log(`\nCommand received: ${command}, with arguments: ${args.join(', ')}, from user ${msg.author.id}.`);
 
   switch(command) {
     case 'auth':
-      if(args.length == 0) {
-        msg.channel.send('\n1. Click link: www.google.com \n2.Click button. \n3. Sign into Eve if you aren\'t already, pick a character, then click button. \n4. Type !auth <string> on the next page into this channel.');
-      }
-      if(args.length == 1) {
-        verifyToken(msg, args[0]);
-      }
+      authCommand(msg, args);
       break;
 
     case 'refresh':
-      //refresh all users
-      var user = msg.author;
-      var guild = client.guilds.find(x => x.id.toString() === msg.channel.guild.id);
-      var guildMember = guild.members.find(x => x.id === user.id);
-      var role = guild.roles.find(x => x.name === config.bot_admin_role);
-
-      if(guildMember.roles.has(role.id)){
-        refreshAllRoles(msg);
-        msg.channel.send("Refreshing all roles...");
-      }
-      else {
-        msg.channel.send(`You do not have the ${role} role required to do that.`)
-      }
+      refreshCommand(msg, args);
       break;
   }
 });
+
+function authCommand(msg, args){
+  if(args.length == 0) {
+    msg.channel.send('\n1. Click link: www.google.com \n2.Click button. \n3. Sign into Eve if you aren\'t already, pick a character, then click button. \n4. Type !auth <string> on the next page into this channel.');
+  }
+  if(args.length == 1) {
+    verifyToken(msg, args[0]);
+  }
+}
+
+function refreshCommand(msg, args) {
+  var user = msg.author;
+  var guild = Client.guilds.find(x => x.id.toString() === msg.channel.guild.id);
+  var guildMember = guild.members.find(x => x.id === user.id);
+  var role = guild.roles.find(x => x.name === Config.bot_admin_role);
+
+  if(guildMember.roles.has(role.id)){
+    msg.channel.send("Refreshing all roles...");
+    refreshAllRoles(msg);
+  }
+  else {
+    msg.channel.send(`You do not have the ${role} role required to do that.`)
+  }
+}
 
 function refreshAllRoles(msg){
   console.log(`Attempting to refresh all user tokens...`);
@@ -84,21 +88,11 @@ function refreshAllRoles(msg){
   cursor.each(function(err, user) {
     if(user == null) return;
     console.log(`Refreshing user: ${user.userID}...`)
-    var guild = client.guilds.find(x => x.id.toString() === user.guildID);
+    var guild = Client.guilds.find(x => x.id.toString() === user.guildID);
     var guildMember = guild.members.find(x => x.id === user.userID);
     msg.channel.send(`Refreshing roles for: ${guildMember}`);
     refreshToken(user.userID, user.guildID, user.data.refresh_token);
   });
-
-}
-
-function updateUserRoles(userid){
-  var user = db.collection('users').find({ userid: userid });
-  tryUpdateRoles(user);
-}
-
-function updateRoles(user) {
-
 }
 
 function verifyToken(msg, code){
@@ -111,7 +105,7 @@ function verifyToken(msg, code){
       method: 'POST',
       url: "https://login.eveonline.com/oauth/token",
       headers: {
-        "authorization": "Basic " + Buffer.from(config.client_id+":"+config.client_secret).toString('base64'),
+        "authorization": "Basic " + Buffer.from(Config.client_id+":"+Config.client_secret).toString('base64'),
         "content-type": "application/json"
       },
       json: {
@@ -121,7 +115,7 @@ function verifyToken(msg, code){
     };
     
     console.log(`\nAttempting POST: ${JSON.stringify(options)}`);
-    request.post(options, function(err, res, body) {
+    Request.post(options, function(err, res, body) {
       if(res && (res.statusCode === 200 || res.statusCode === 201)) {
         console.log(`\nPOST success.  Body: ${JSON.stringify(body)}`)
         
@@ -170,13 +164,13 @@ function updateRoles(userID, guildID, accessToken) {
     }
   };
 
-  request.get(options, function(err, res, body) {
+  Request.get(options, function(err, res, body) {
     if(res && (res.statusCode === 200 || res.statusCode === 201)) {
       console.log(`\nPOST success.  Body: ${JSON.stringify(body)}`)
       var data = JSON.parse(body);
       var characterName = data.CharacterName;
-      var defaultRole = config.role_mappings.default;
-      var guild = client.guilds.find(x => x.id.toString() === guildID.toString());
+      var defaultRole = Config.role_mappings.default;
+      var guild = Client.guilds.find(x => x.id.toString() === guildID.toString());
       var guildMember = guild.members.find(x => x.id === userID.toString());
       var role = guild.roles.find(x => x.name === defaultRole);
 
@@ -185,9 +179,9 @@ function updateRoles(userID, guildID, accessToken) {
       guildMember.addRole(role);
 
       //Check corp roles
-      esi.characters(data.CharacterID).info().then(result => {
+      ESI.characters(data.CharacterID).info().then(result => {
         var corp = result.corporation_id;
-        var corpRoles = config.role_mappings.corp;
+        var corpRoles = Config.role_mappings.corp;
 
         corpRoles.forEach(function(corpRole) {
           console.log(`Checking role for ${corpRole.role_name}`)
@@ -202,12 +196,12 @@ function updateRoles(userID, guildID, accessToken) {
         });
 
         //Check alliance roles
-        esi.corporations(result.corporation_id).info().then(result => {
+        ESI.corporations(result.corporation_id).info().then(result => {
           var ticker = result.ticker;
           guildMember.setNickname(`[${ticker}] ${characterName}`);
           
           var alliance = result.alliance_id;
-          var allianceRoles = config.role_mappings.alliance;
+          var allianceRoles = Config.role_mappings.alliance;
           
           allianceRoles.forEach(function(allianceRole) {
             console.log(`Checking role for ${allianceRole.role_name}`)
@@ -230,15 +224,13 @@ function updateRoles(userID, guildID, accessToken) {
   });
 }
 
-
-
 function refreshToken(userID, guildID, refreshToken){
   console.log(`\nRefreshing the token for user: ${userID} in guild: ${guildID}, of token: ${refreshToken}.`);
   var options = {
     method: 'POST',
     url: "https://login.eveonline.com/oauth/token",
     headers: {
-      "Authorization": "Basic " + Buffer.from(config.client_id+":"+config.client_secret).toString('base64'),
+      "Authorization": "Basic " + Buffer.from(Config.client_id+":"+Config.client_secret).toString('base64'),
       "content-type": "application/json"
     },
     json: {
@@ -247,7 +239,7 @@ function refreshToken(userID, guildID, refreshToken){
     }
   };
 
-  request.post(options, function(err, res, body) {
+  Request.post(options, function(err, res, body) {
     console.log(`\nPOST success.  Body: ${JSON.stringify(body)}`)
     
     db.collection('users').update(
@@ -272,8 +264,4 @@ function refreshToken(userID, guildID, refreshToken){
   });
 }
 
-
-client.login(config.token);
-
-
-
+Client.login(Config.token);
