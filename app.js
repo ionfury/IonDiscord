@@ -59,7 +59,7 @@ Client.on('message', msg => {
 
 function authCommand(msg, args){
   if(args.length == 0) {
-    msg.channel.send('\n1. Click link: www.google.com \n2.Click button. \n3. Sign into Eve if you aren\'t already, pick a character, then click button. \n4. Type !auth <string> on the next page into this channel.');
+    msg.channel.send(`\n1. Click link: ${Config.auth_url} \n2.Click button. \n3. Sign into Eve if you aren\'t already, pick a character, then click button. \n4. Type !auth <string> on the next page into this channel.`);
   }
   if(args.length == 1) {
     verifyToken(msg, args[0]);
