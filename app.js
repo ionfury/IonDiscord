@@ -9,7 +9,7 @@ const authString = '!auth';
 const esi = require('eve-swagger');
 var db;
 
-MongoClient.connect('mongodb://<username>:<password>@ds159050.mlab.com:59050/iondiscord', (err, database) => {
+MongoClient.connect(`mongodb://${config.database_username}:${config.database_password}@ds159050.mlab.com:59050/iondiscord`, (err, database) => {
   if (err) return console.log(err)
   db = database
 });
