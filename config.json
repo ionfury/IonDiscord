@@ -6,11 +6,11 @@
       "value": "authorization_code"
     }
   ],
-  "token"  : "MzUwMjkyNDI3NDA5NTg4MjI1.DJWtEQ.9gIkAMoor_L9cbmfcOQaJDdnGQY", 
+  "token"  : "", 
   "prefix" : "!",
   "game" : "EVE Online",
-  "client_id" : "2c76df7cec724a85acf6f0ced3f55a45",
-  "client_secret" : "9ffLkMmgWMVJ7FnOOhEykm0HdGY2KsBBMhp9hMW9",
+  "client_id" : "",
+  "client_secret" : "",
   "role_mappings" : {
     "corp" : [
       {
