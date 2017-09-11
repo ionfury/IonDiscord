@@ -83,7 +83,7 @@ function refreshCommand(msg, args) {
 
 function refreshAllRoles(msg){
   console.log(`Attempting to refresh all user tokens...`);
-  var cursor = db.collection('users').find();
+  var cursor = db.collection('users').find({guildID: msg.channel.guild.id});
 
   cursor.each(function(err, user) {
     if(user == null) return;
