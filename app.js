@@ -10,16 +10,40 @@ var connectionUrl = `mongodb://${Config.database_username}:${Config.database_pas
 Client.on('ready', () => {
   console.log(`\nBot has started, with ${Client.users.size} users, in ${Client.channels.size} channels of ${Client.guilds.size} guilds.`); 
 
+  //check config.bot_admin_role exists
+  Client.guilds.forEach(guild => {
+    if(!guild.roles.some(role => role.name === config.bot_admin_role)) {
+      console.log(`\n WARNING! ${guild.name} does not have ${config.bot_admin_role} configured!`);
+    }
+
+    if(!guild.members.some(member => !member.roles.some(role => role.name === config.bot_admin_role))) {
+      console.log(`\n WARNING! ${guild.name} does not have any users with ${config.bot_admin_role} granted!`);
+    }
+  });
+
   Client.user.setGame(Config.game);
 });
 
 Client.on('guildCreate', guild => {
+  var guildInformation = {
+    "playing": "Needs Configuration",
+    "corp_roles": [{"corp_id": 1234, "role_name": "SUAD"}],
+    "alliance_roles": [],
+    "default_role": "PUBLIC"
+  };
+
   console.log(`\nNew guild joined: ${guild.name} (id: ${guild.id}). This guild has ${guild.memberCount} members!`);
-  Client.user.setGame(Config.game);
+
+  guildInformationUpsert(guild, guildInformation);
+
+  Client.user.setGame(guildInformation.playing);
 });
 
 Client.on('guildDelete', guild => {
-  console.log(`\nNew guild joined: ${guild.name} (id: ${guild.id}). This guild has ${guild.memberCount} members!`);
+  console.log(`\nGuild Removed: ${guild.name} (id: ${guild.id}). This guild had ${guild.memberCount} members!`);
+
+  guildInformationDelete(guild);
+
   Client.user.setGame(Config.game);
 });
 
@@ -46,11 +70,167 @@ Client.on('message', msg => {
       refreshCommand(msg, args);
       break;
 
+    case 'purge':
+      purgeCommand(msg, args);
+      break;
+
+    case 'corps':
+      corpCommand(msg, args);
+      break;
+
+    case 'alliances':
+      allianceCommand(msg, args);
+      break;
+
     case 'help':
       helpCommand(msg, args);
       break;
   }
 });
+
+function addCorpToRole(corpID, role, guild) {
+  guildInformation = guildInformationGet(guild);
+
+  if(!guildInformation.corp_roles.some(kvp => kvp.role_name === role.name)) {
+    guildInformation.corp_roles.push({"corp_id": corpID, "role_name": role.name});
+  }
+
+  guildInformationUpsert(guild, guildInformation);  
+}
+
+function removeCorpFromRole(corp, role, guild) {
+  guildInformation = guildInformationGet(guild);
+  
+  if(guildInformation.corp_roles.some(kvp => kvp.role_name === role.name)) {
+    guildInformation.corp_roles.forEach(kvp => {
+      if(kvp.corp_id === corp) {
+        delete guildInformation.corp_roles[kvp];
+      }
+    });
+  }
+
+  guildInformationUpsert(guild, guildInformation);
+}
+
+function addAllianceToRole(alliance, role, guild) {
+  guildInformation = guildInformationGet(guild);
+
+  if(!guildInformation.alliance_roles.some(kvp => kvp.role_name === role.name)) {
+    guildInformation.alliance_roles.push({"alliance_id": alliance, "role_name": role.name});
+  }
+
+  guildInformationUpsert(guild, guildInformation);
+}
+
+function removeAllianceFromRole(alliance, role, guild) {
+  guildInformation = guildInformationGet(guild);
+
+  if(guildInformation.alliance_roles.some(kvp => kvp.role_name === role.name)) {
+    guildInformation.alliance_roles.forEach(kvp => {
+      if(kvp.alliance_id === alliance) {
+        delete guildInformation.allianceRoles[kvp];
+      }
+    })
+  }
+
+  guildInformationUpsert(guild, guildInformation);
+}
+
+function getGuildCorpRoles(guild) {
+  guildInformation = guildInformationGet(guild);
+
+  var corpRoles = guild.roles.filter(role => guildInformation.corp_roles.some(kvp => kvp.role_name === role.name));
+
+  return corpRoles;
+}
+
+function getGuildAllianceRoles(guild) {
+  guildInformation = guildInformationGet(guild);
+
+  var allianceRoles = guild.roles.filter(role => guildInformation.alliance_roles.some(kvp => kvp.role_name === role.name));
+
+  return allianceRoles;
+}
+
+function guildInformationGet(guild) {
+  MongoClient.connect(connectionUrl, function(err, db) {
+    if(err) throw err;
+
+    var query = { guildID: guild.id };
+
+    db.collection('guilds').findOne(query, function(err, res) {
+      if(err) throw err;
+      return res;
+    });
+  });
+}
+
+function guildInformationUpsert(guild, guildInformation) {
+  MongoClient.connect(connectionUrl, function(err, db) {
+    if(err) throw err;
+
+    var query = { guildID: guild.id };
+    var values = { guildID: guild.id, guildInformation: guildInformation };
+    var options = { upsert: true };
+
+    db.collection('guilds').updateOne(query, values, options, function(err, res) {
+      if(err) throw err;
+      db.close();
+    });
+  });
+}
+
+function guildInformationDelete(guild) {
+  MongoClient.connect(connectionUrl, function(err, db) {
+    if(err) throw err;
+
+    var query = { guildID : guild.id };
+
+    db.collection('users').remove(query, function(err, res) {
+      if(err) throw err;
+      db.close();        
+    });
+
+    db.collection('guilds').remove(query, function(err, res) {
+      if(err) throw err;
+      db.close();
+    });
+  });
+}
+
+function purgeMember(guild, guildMember) {
+  //guildMember.kick(`You have not authenticated on this server and are being removed.`);
+}
+
+function purgeAllMembersWithoutRole(guild, role) {
+  guildMembers = getAllAuthGuildMembers(guild);
+  
+  var removeMembers = [];
+
+  guild.members.forEach(function (guildMember) {
+    if(!guildMember.roles.has(role.id)) {
+      purgeMember(guild, guildMember);
+    }
+  });
+}
+
+function getAllAuthGuildMembers(guild) {
+  var guildID = guild.id;
+  
+  MongoClient.connect(connectionUrl, function(err, db) {
+    if(err) throw err;
+
+    var query = { guildID: guildID };
+
+    db.collection('users').find(query).toArray(function(err, result) {
+      if(err) throw err;
+
+      db.close();
+
+      return result;
+    });
+  });
+}
 
 /// Displays the help message
 function helpCommand(msg, args) {
@@ -70,7 +250,7 @@ function authCommand(msg, args){
 /// Refresh functionality
 function refreshCommand(msg, args) {
   var user = msg.author;
-  var guild = Client.guilds.find(x => x.id.toString() === msg.channel.guild.id);
+  var guild = msg.channel.guild;
   var guildMember = guild.members.find(x => x.id === user.id);
   var role = guild.roles.find(x => x.name === Config.bot_admin_role);
   var hasRole = guildMember.roles.has(role.id);
@@ -86,7 +266,110 @@ function refreshCommand(msg, args) {
     var updateMember = guild.members.find(x => x.toString() === args[0]);
     refreshUserRoles(msg, updateMember);
   }  else {
-    msg.channel.send(`You do not have the ${role} role required to do that.`)
+    msg.channel.send(`You do not have the ${role} role required to do that.`);
+  }
+}
+
+/*
+ * purgeCommand
+ * msg: the message object which initiated this command
+ * args: the arguments passed into the message
+ * 
+ * usage:
+ * !purge - purges all users without the ${config.default_role} role.
+ * !purge @user - purge @users if they do not have the ${config.default_role} role.
+ */
+function purgeCommand(msg, args) {
+  var user = msg.author;
+  var guild = msg.channel.guild;
+  var guildMember = guild.members.find(x => x.id === user.id);
+
+  if(!checkHasBotAdminRole(guild, guildMember)) {
+    msg.channel.send(`You do not have the required roles to perform this command.`);
+    return;
+  }
+
+  if(args.length === 0) {
+    msg.channel.send(`Purging all members without the public role...`);
+    //purgeAllMembersWithoutRole(guild,)
+
+  } else if (args.length === 1 && hasRole) {
+    msg.channel.send(`Purging member x if they don't have the public role`)
+  }
+}
+
+/*
+ * corpCommand
+ * msg: the message object which initiated this command
+ * args: the arguments passed into the message
+ * 
+ * usage:
+ * !corp - view all corp ids and their associated roles
+ * !corp add ROLE CORP_ID - adds the association between ROLE and CORP_ID (all users authing in CORP will be given ROLE)
+ * !corp remove ROLE CORP_ID - removes the association between ROLE and CORP_ID
+ */
+function corpCommand(msg, args) {
+  var user = msg.author;
+  var guild = msg.channel.guild;
+  var guildMember = guild.members.find(x => x.id === user.id);
+
+  if(!checkHasBotAdminRole(guild, guildMember)) {
+    msg.channel.send(`You do not have the required roles to perform this command.`);
+    return;
+  }
+
+  if(args.length == 0) {
+    var roles = getGuildCorpRoles(guild);
+    msg.channel.send(`Corp roles: ${roles}.`);
+  } else if (args.length == 3) {
+    if(args[0] === "add" || args[1] === "remove") {
+      var role = args[1];
+      var corpID = args[2];
+      
+      if(args[0] === "add") {
+        addCorpToRole(corp, role, guild);
+      }
+      if(args[0] === "remove") {
+        removeCorpFromRole(corp, role, guild);
+      }
+    } else {
+      msg.channel.send(`Second argument must be either 'add' or 'remove'.`);
+    }
+  } else {
+    msg.channel.send(`Invalid number of arguments ${args.length}.`);
+  }
+}
+
+/*
+ * allianceCommand
+ * msg: the message object which initiated this command
+ * args: the arguments passed into the message
+ * 
+ * usage:
+ * !alliance - view all alliance ids and their associated roles
+ * !alliance add ROLE ALLIANCE_ID - adds the association between ROLE and ALLIANCE_ID (all users authing in ALLIANCE will be given ROLE)
+ * !alliance remove ROLE ALLIANCE_ID - removes the association between ROLE and ALLIANCE_ID
+ */
+function allianceCommand(msg, args) {
+  var user = msg.author;
+  var guild = msg.channel.guild;
+  var guildMember = guild.members.find(x => x.id === user.id);
+
+  if(!checkHasBotAdminRole(guild, guildMember)) {
+    msg.channel.send(`You do not have the required roles to perform this command.`);
+    return;
+  }
+
+  if(args.length == 0) {
+
+  } else if (args.length == 3) {
+    if(args[1] === "add" || args[1] === "remove") {
+
+    } else {
+      msg.channel.send(`Second argument must be either 'add' or 'remove'.`);
+    }
+  } else {
+    msg.channel.send(`Invalid number of arguments ${args.length}.`);
   }
 }
 
@@ -310,5 +593,14 @@ function refreshToken(guildMember, guild, refreshToken, channel){
     }
   });
 }
+
+function checkHasBotAdminRole(guild, guildMember) {
+  var role = guild.roles.find(x => x.name === Config.bot_admin_role);
+  var hasRole = guildMember.roles.has(role.id);
+
+  return guildMember.roles.has(role.id);
+}
+
+
 
 Client.login(Config.token);
