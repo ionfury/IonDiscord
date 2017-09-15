@@ -5,19 +5,24 @@ const Http = require('http');
 const MongoClient = require('mongodb').MongoClient;
 const Client = new Discord.Client();
 const ESI = require('eve-swagger');
-var connectionUrl = `mongodb://${Config.database_username}:${Config.database_password}@ds159050.mlab.com:59050/iondiscord`;
+//var connectionUrl = `//mongodb:${Config.database_username}:${Config.database_password}@ds159050.mlab.com:59050/iondiscord`;
+var connectionUrl = `mongodb://${Config.database_username}:${Config.database_password}@ds135364.mlab.com:35364/iondiscordtest`;
+
 
 Client.on('ready', () => {
   console.log(`\nBot has started, with ${Client.users.size} users, in ${Client.channels.size} channels of ${Client.guilds.size} guilds.`); 
 
-  //check config.bot_admin_role exists
+  //check Config.bot_admin_role exists
   Client.guilds.forEach(guild => {
-    if(!guild.roles.some(role => role.name === config.bot_admin_role)) {
-      console.log(`\n WARNING! ${guild.name} does not have ${config.bot_admin_role} configured!`);
-    }
-
-    if(!guild.members.some(member => !member.roles.some(role => role.name === config.bot_admin_role))) {
-      console.log(`\n WARNING! ${guild.name} does not have any users with ${config.bot_admin_role} granted!`);
+    
+    if(!guild.roles.some(role => role.name === Config.bot_admin_role)) {
+      console.log(`\n WARNING! Guild [${guild.name}] does not have role [${Config.bot_admin_role}] created!`);
+    } else {
+      var botAdminRole = guild.roles.find(role => role.name === Config.bot_admin_role);
+      
+      if(!guild.members.some(member => member.roles.some(role => role === botAdminRole))) {
+        console.log(`\n WARNING! Guild [${guild.name}] does not have any users with [${Config.bot_admin_role}] role granted!`);
+      }
     }
   });
 
@@ -26,7 +31,6 @@ Client.on('ready', () => {
 
 Client.on('guildCreate', guild => {
   var guildInformation = {
-    "playing": "Needs Configuration",
     "corp_roles": [{"corp_id": 1234, "role_name": "SUAD"}],
     "alliance_roles": [],
     "default_role": "PUBLIC"
@@ -35,22 +39,18 @@ Client.on('guildCreate', guild => {
   console.log(`\nNew guild joined: ${guild.name} (id: ${guild.id}). This guild has ${guild.memberCount} members!`);
 
   guildInformationUpsert(guild, guildInformation);
-
-  Client.user.setGame(guildInformation.playing);
 });
 
 Client.on('guildDelete', guild => {
   console.log(`\nGuild Removed: ${guild.name} (id: ${guild.id}). This guild had ${guild.memberCount} members!`);
 
   guildInformationDelete(guild);
-
-  Client.user.setGame(Config.game);
 });
 
 Client.on("guildMemberAdd", member => {
-  var guild = member.guild;
-  var channel = guild.channels.find(x => x.name === "landing_channel");
-  channel.send(`Welcome ${member.user.username}, type !auth to begin.`);
+  var channel = member.guild.channels.find(x => x.name === "landing_channel");
+
+  channel.send(`Welcome ${member} to the ${member.guild.name} discord server.  Type !auth to authenticate with your EVE Online account to continue`);
 });
 
 Client.on('message', msg => {
@@ -74,16 +74,20 @@ Client.on('message', msg => {
       purgeCommand(msg, args);
       break;
 
-    case 'corps':
+    case 'corp':
       corpCommand(msg, args);
       break;
 
-    case 'alliances':
+    case 'alliance':
       allianceCommand(msg, args);
       break;
 
     case 'help':
       helpCommand(msg, args);
+      break;
+
+    default:
+      msg.channel.send(`Command not recognized.`);
       break;
   }
 });
@@ -240,7 +244,7 @@ function helpCommand(msg, args) {
 /// Auth functionality
 function authCommand(msg, args){
   if(args.length == 0) {
-    msg.channel.send(`\n1. Click link: ${Config.auth_url} \n2.Click button. \n3. Sign into Eve if you aren\'t already, pick a character, then click button. \n4. Type !auth <string> on the next page into this channel.`);
+    msg.channel.send(`\n1. Click link: ${Config.auth_url} \n2.Click button. \n3. Sign into Eve if you haven't already, pick a character, then click the button. \n4. Type !auth <string> on the next page into this channel.`);
   }
   if(args.length == 1) {
     verifyToken(msg, args[0]);
@@ -276,8 +280,8 @@ function refreshCommand(msg, args) {
  * args: the arguments passed into the message
  * 
  * usage:
- * !purge - purges all users without the ${config.default_role} role.
- * !purge @user - purge @users if they do not have the ${config.default_role} role.
+ * !purge - purges all users without the ${Config.default_role} role.
+ * !purge @user - purge @users if they do not have the ${Config.default_role} role.
  */
 function purgeCommand(msg, args) {
   var user = msg.author;
