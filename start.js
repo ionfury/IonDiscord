@@ -27,8 +27,8 @@ Client.on('ready', () => {
 
 Client.on('guildCreate', guild => {
   var guildInformation = {
-    "corp_roles": [{"corp_id": 1234, "role_name": "SUAD"}],
-    "alliance_roles": [],
+    "corp_roles": [{"corp_id": 1091440439, "role_name": "SUAD"}],
+    "alliance_roles": [{"alliance_id": 498125261, "role_name": "TEST"}],
     "default_role": "PUBLIC"
   };
 
