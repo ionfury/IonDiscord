@@ -42,6 +42,9 @@ module.exports = {
           break;
         case "purge":
           message += `\npurge:`
+          message += `\n\tstrips ALL ROLES from users who have not yet authenticated.`;
+          message += `\n`;
+          message += `\nusage:`;
           message += `\nREQUIRES: ${Config.bot_admin_role} role:`;
           message += `\n\t"${Config.prefix}purge": strips ALL roles from users who have no auth information.`;
           break;
@@ -77,7 +80,7 @@ module.exports = {
           message += `\n\t2. The alliance's key will be: zkillboard.com/alliance/<key>/`
           message += `\n`;
           message += `\nEXAMPLE:`;
-          message += `\n\t${Config.prefix}corp add 498125261 TEST`;
+          message += `\n\t${Config.prefix}alliance add 498125261 TEST`;
           break;
         case "default":
           message += `\ndefault:`;
@@ -88,10 +91,14 @@ module.exports = {
           message += `\n\t"${Config.prefix}default": displays the default role for users who have authenticated.`;
           message += `\n\t"${Config.prefix}default <string>": sets the default role for users who have authenticated where <string> is the exact name of the role..`;
         case "notify":
-          message += `\nnotify command usage:`
+          message += `\nnotify:`
+          message += `\nNotifies users on the server who have not authenticated yet that they should.`;
+          message += `\n`;
+          message += `\nusage:`;
+          message += `\n\t"${Config.prefix}notify" mentions all users who have not authenticated.`;
           break;
         case "subscription":
-          message += `\nsubscription command usage:`
+          message += `\nNOT YET IMPLEMENTED:`
           break;
         default:
           message += `No such command: "${args[0]}".`;
@@ -127,14 +134,16 @@ module.exports = {
   */
   authCommand: function(msg, args){
     if(args.length == 0) {
-      msg.channel.send(`\n1. Click link: ${Config.auth_url} \n2.Click button. \n3. Sign into Eve if you haven't already, pick a character, then click the button. \n4. Type !auth <string> on the next page into this channel.`);
-    }
-    if(args.length == 1) {
+      var address = Config.auth_url + "?sender=" + msg.channel.guild.name
+      msg.channel.send(`\n1. Click link: ${address} \n2.Click button. \n3. Sign into Eve if you haven't already, pick a character, then click the button. \n4. Type !auth <string> on the next page into this channel.`);
+    }else if(args.length == 1) {
       var userID = msg.author.id;
       var guild = msg.channel.guild;
       var guildMember = guild.members.find(x => x.id === userID.toString());
 
       Utils.Authorize(msg, guildMember, args[0]);
+    } else {
+      msg.channel.send(`:x: Invalid number of arguments: ${args.length}.`);
     }
   },
 
