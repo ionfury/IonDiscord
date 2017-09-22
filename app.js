@@ -8,7 +8,6 @@ const ESI = require('eve-swagger');
 //var connectionUrl = `//mongodb:${Config.database_username}:${Config.database_password}@ds159050.mlab.com:59050/iondiscord`;
 var connectionUrl = `mongodb://${Config.database_username}:${Config.database_password}@ds135364.mlab.com:35364/iondiscordtest`;
 
-
 Client.on('ready', () => {
   console.log(`\nBot has started, with ${Client.users.size} users, in ${Client.channels.size} channels of ${Client.guilds.size} guilds.`); 
 

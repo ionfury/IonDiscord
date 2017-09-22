@@ -1,12 +1,9 @@
 const Discord = require(`discord.js`);
 const Promise = require('bluebird');
 
-const Config = require(`./../../config.json`);
+const Utils = require (`./Utils.js`);
 
-const Guild = require(`../db/Guild.js`);
-const User = require(`../db/User.js`);
-const Utils = require(`../Utils.js`);
-const Api = require(`./Api.js`);
+const Config = require(`./../../config.json`);
 
 module.exports = {
   /*
@@ -17,7 +14,106 @@ module.exports = {
   * !help
   */
   helpCommand: function(msg, args) {
-    msg.channel.send(`\n\`\`\`Commands are: \n\t!auth: follow commands to identify yourself on this server.\n\t!refresh: refreshes your auth information once it's already been cached.\n\t!help: Displays this message.\`\`\``);
+    var hasAdmin = Utils.CheckHasRoleByName(msg.member, Config.bot_admin_role)
+
+    var message = ``;
+    if(args.length == 1) {
+      switch (args[0]){
+        case "help":
+          msg.channel.send("http://i0.kym-cdn.com/entries/icons/original/000/021/158/bleach.jpg");
+          return;
+          break;
+        case "auth":
+          message += `\nauth:`;
+          message += `\n\thandles authenticating a discord user to an EVE online account.`;
+          message += `\n`;
+          message += `\nusage:`;
+          message += `\n\t"${Config.prefix}auth": displays the steps to authenticate.`;
+          message += `\n\t"${Config.prefix}auth <string>": attempts to authenticate with <string>.`;
+          break;
+        case "refresh":
+          message += `\nrefresh:`;
+          message += `\n\thandles refreshing a user's information once they have already authenticated on this server.`;
+          message += `\n`;
+          message += `\nusage:`;
+          message += `\n\t"${Config.prefix}refresh": attempts to refresh user details with existing auth token.`;
+          message += `\nREQUIRES: ${Config.bot_admin_role} role:`;
+          message += `\n\t"${Config.prefix}refresh <@user>": attempts to refresh <@user>'s details with their existing auth token.`;
+          break;
+        case "purge":
+          message += `\npurge:`
+          message += `\nREQUIRES: ${Config.bot_admin_role} role:`;
+          message += `\n\t"${Config.prefix}purge": strips ALL roles from users who have no auth information.`;
+          break;
+        case "corp":
+          message += `\ncorp:`;
+          message += `\n\thandles display & configuration of relationships between EVE corporations and discord roles.`;
+          message += `\n`;
+          message += `\nusage:`;
+          message += `\nREQUIRES: ${Config.bot_admin_role} role:`;
+          message += `\n\t"${Config.prefix}corp": displays list of configured corporation id: role mappings`;
+          message += `\n\t"${Config.prefix}corp add <int> <string>": adds a corp-role relationship where <int> is the corp key and <string> is the exact name of the role.`;
+          message += `\n\t"${Config.prefix}corp remove <int> <string>": removes a corp-role relationship where <int> is the corp key and <string> is the exact name of the role.`;
+          message += `\n`;
+          message += `\nTo find a corp key:`;
+          message += `\n\t1. Open the corp's zkill page and look in the url.`;
+          message += `\n\t2. the corp's key will be: zkillboard.com/corporation/<key>/`
+          message += `\n`;
+          message += `\nEXAMPLE:`;
+          message += `\n\t${Config.prefix}corp add 1091440439 SUAD`;
+          break;
+        case "alliance":
+          message += `\nalliance:`;
+          message += `\n\thandles display & configuration of relationships between EVE alliances and discord roles.`;
+          message += `\n`;
+          message += `\nusage:`;
+          message += `\nREQUIRES: ${Config.bot_admin_role} role:`;
+          message += `\n\t"${Config.prefix}alliance": displays list of configured alliance id: role mappings`;
+          message += `\n\t"${Config.prefix}alliance add <int> <string>": adds a alliance-role relationship where <int> is the corp key and <string> is the exact name of the role.`;
+          message += `\n\t"${Config.prefix}alliance remove <int> <string>": removes a alliance-role relationship where <int> is the corp key and <string> is the exact name of the role.`;
+          message += `\n`;
+          message += `\nTo find an alliance key:`;
+          message += `\n\t1. Open the alliance's zkill page and look in the url.`;
+          message += `\n\t2. The alliance's key will be: zkillboard.com/alliance/<key>/`
+          message += `\n`;
+          message += `\nEXAMPLE:`;
+          message += `\n\t${Config.prefix}corp add 498125261 TEST`;
+          break;
+        case "default":
+          message += `\ndefault:`;
+          message += `\n\thandles configuration of the default role for users who have authenticated.`;
+          message += `\n`;
+          message += `\nusage:`;
+          message += `\nREQUIRES: ${Config.bot_admin_role} role:`;
+          message += `\n\t"${Config.prefix}default": displays the default role for users who have authenticated.`;
+          message += `\n\t"${Config.prefix}default <string>": sets the default role for users who have authenticated where <string> is the exact name of the role..`;
+        case "notify":
+          message += `\nnotify command usage:`
+          break;
+        case "subscription":
+          message += `\nsubscription command usage:`
+          break;
+        default:
+          message += `No such command: "${args[0]}".`;
+          break;
+      }
+    }
+    else {
+      message += `Try help <command> for specifics\n`;
+      message += `\nCommands:`;
+      message += `\n\tauth`;
+      message += `\n\trefresh`;
+      message += `\n\tpurge`;
+      message += `\n\tdefault`;
+      message += `\n\tcorp`;
+      message += `\n\talliance`;
+      message += `\n\tnotify`;
+      message += `\n\tsubscription`;
+    }
+
+
+    msg.channel.send("```" + message + "```");
+    //msg.channel.send(`\n\`\`\`Commands are: \n\t!auth: follow commands to identify yourself on this server.\n\t!refresh: refreshes your auth information once it's already been cached.\n\t!help: Displays this message.\`\`\``);
   },
 
   /*
@@ -38,7 +134,7 @@ module.exports = {
       var guild = msg.channel.guild;
       var guildMember = guild.members.find(x => x.id === userID.toString());
 
-      Authorize(msg, guildMember, args[0]);
+      Utils.Authorize(msg, guildMember, args[0]);
     }
   },
 
@@ -52,25 +148,34 @@ module.exports = {
   * !refresh @user - 
   */
   refreshCommand: function(msg, args) {
-    msg.channel.send(`Command not yet implemented.`)
-    return;
     var user = msg.author;
     var guild = msg.channel.guild;
     var guildMember = guild.members.find(x => x.id === user.id);
     var role = guild.roles.find(x => x.name === Config.bot_admin_role);
     var hasRole = guildMember.roles.has(role.id);
+    
     if(args.length === 0){
-      if(hasRole) {
-        msg.channel.send("Refreshing all roles...");
-        refreshAllRoles(msg);
+      msg.channel.send(`Refreshing roles for ${guildMember}`);
+      Utils.RefreshUserRoles(msg, guildMember);
+
+    } else if (args.length == 1) {
+      if(!hasRole) {
+        msg.channel.send(`:x:You do not have the ${role} role required to do that.`)
+      } else if (args[0] === "all") {
+        msg.channel.send(`Refreshing all user roles.`);
+
+        Utils.RefreshAllUserRoles(msg, guild);
       } else {
-        refreshUserRoles(msg, guildMember);
+        var member = msg.mentions.members.first();
+        if(!member) 
+          return msg.channel.send(`:x: Invalid member.`);
+
+        msg.channel.send(`Refreshing ${member}'s roles.`);
+        
+        Utils.RefreshUserRoles(msg, member);
       }
-    } else if (args.length === 1 && hasRole) {
-      var updateMember = guild.members.find(x => x.toString() === args[0]);
-      refreshUserRoles(msg, updateMember);
-    }  else {
-      msg.channel.send(`You do not have the ${role} role required to do that.`);
+    } else {
+      msg.channel.send(`Invalid number of arguments: ${args.length}.`);
     }
   },
 
@@ -84,20 +189,18 @@ module.exports = {
   * !purge @user - purge @users if they do not have the ${Config.default_role} role.
   */
   purgeCommand: function(msg, args) {
-    msg.channel.send(`Command not yet implemented.`)
-    return;
     var user = msg.author;
     var guild = msg.channel.guild;
     var guildMember = guild.members.find(x => x.id === user.id);
 
-    if(!Utils.checkHasBotAdminRole(guild, guildMember)) {
+    if(!Utils.CheckHasRoleByName(guildMember, Config.bot_admin_role)) {
       msg.channel.send(`You do not have the required roles to perform this command.`);
       return;
     }
 
     if(args.length === 0) {
-      msg.channel.send(`Purging all members without the public role...`);
-      //purgeAllMembersWithoutRole(guild,)
+      msg.channel.send(`Purging roles from unauthorized roles...`);
+      Utils.Purge(msg, guild);
 
     } else if (args.length === 1 && hasRole) {
       msg.channel.send(`Purging member x if they don't have the public role`)
@@ -126,17 +229,17 @@ module.exports = {
 
     //Display corp roles
     if(args.length == 0) {
-      DisplayCorpRoles(msg, guild);
+      Utils.DisplayCorpRoles(msg, guild);
     } else if (args.length == 3) {
       if(args[0] === "add" || args[0] === "remove") {
         var corpID = args[1];
         var roleName = args[2];
 
         if(args[0] === "add") {
-          AddCorpToRole(msg, corpID, roleName, msg.channel.guild);
+          Utils.AddCorpToRole(msg, corpID, roleName, msg.channel.guild);
         }
         if(args[0] === "remove") {
-          RemoveCorpFromRole(msg, corpID, roleName, msg.channel.guild);
+          Utils.RemoveCorpFromRole(msg, corpID, roleName, msg.channel.guild);
         }
       } else {
         msg.channel.send(`Second argument must be either 'add' or 'remove'.`);
@@ -168,17 +271,17 @@ module.exports = {
 
     //Display alliance roles
     if(args.length == 0) {
-      DisplayAllianceRoles(msg, guild);
+      Utils.DisplayAllianceRoles(msg, guild);
     } else if (args.length == 3) {
       if(args[0] === "add" || args[0] === "remove") {
         var allianceID = args[1];
         var roleName = args[2];
 
         if(args[0] === "add") {
-          AddAllianceToRole(msg, allianceID, roleName, msg.channel.guild);
+          Utils.AddAllianceToRole(msg, allianceID, roleName, msg.channel.guild);
         }
         if(args[0] === "remove") {
-          RemoveAllianceFromRole(msg, allianceID, roleName, msg.channel.guild);
+          Utils.RemoveAllianceFromRole(msg, allianceID, roleName, msg.channel.guild);
         }
       } else {
         msg.channel.send(`Second argument must be either 'add' or 'remove'.`);
@@ -186,191 +289,51 @@ module.exports = {
     } else {
       msg.channel.send(`Invalid number of arguments ${args.length}.`);
     }
+  },
+
+  notifyCommand: function(msg, args) {
+    var user = msg.author;
+    var guild = msg.channel.guild;
+    var guildMember = guild.members.find(x => x.id === user.id);
+
+    if(!Utils.CheckHasRoleByName(guildMember, Config.bot_admin_role)) {
+      msg.channel.send(`You do not have the required roles to perform this command.`);
+      return;
+    }
+
+    if(args.length == 0) {
+      msg.channel.send(`The following users have not authenticated: `);
+      Utils.NotifyUnauthenticatedUsers(msg, guild);
+    } else {
+      msg.channel.send(`Invalid number of arguments ${args.length}.`);
+    }
+  },
+
+  defaultCommand: function(msg, args) {
+    var user = msg.author;
+    var guild = msg.channel.guild;
+    var guildMember = guild.members.find(x => x.id === user.id);
+
+    if(!Utils.CheckHasRoleByName(guildMember, Config.bot_admin_role)) {
+      msg.channel.send(`You do not have the required roles to perform this command.`);
+      return;
+    }
+
+    if(args.length == 0) {
+      Utils.DisplayDefaultRole(msg, guild);
+    } else if (args.length == 2) {
+      if(args[0] === "set") {
+        var roleName = args[1];
+        Utils.SetDefaultRole(msg, roleName, guild);
+      } else {
+        msg.channel.send(`Second argument must be 'set'.`);
+      }
+    } else {
+      msg.channel.send(`Invalid number of arguments ${args.length}.`);
+    }
+  },
+
+  subscriptionCommand: function(msg, args) {
+    console.log("err");
   }
-}
-
-/**
- * Respond in msg.channel with a list of alliance role associations.
- * @param {*Discordjs.Message} msg - The message which triggered this action.
- * @param {*Discordjs.Guild} guild - The guild to display alliances for.
- */
-var DisplayAllianceRoles = function(msg, guild) {
-  Guild.GuildGet(guild)
-    .then(out => {
-      var message = `Alliance role mappings:\n`
-
-      message += out.guildInformation.alliance_roles
-      .map(allianceRole => {
-        var role = guild.roles.find(role => role.name === allianceRole.role_name);
-        return `\t${allianceRole.alliance_id}: ${role}`;
-      }).join(`\n`);
-      
-      msg.channel.send(`${message}`);
-    })
-    .catch(err => {
-      msg.channel.send(`:x: ${err}`);
-    });
-}
-
-/**
- * Attempts to add the alliance/role association to guild and replies in msg.channel with the result.
- * @param {*Discordjs.Message} msg - The message which triggered this action.
- * @param {*int} allianceID - The allianceID to add.
- * @param {*string} roleName - The role name to add.
- * @param {*Discordjs.Guild} guild - The guild to add the alliance and role to.
- */
-var AddAllianceToRole = function (msg, allianceID, roleName, guild) {
-  Guild.GuildGet(guild)
-    .then(out => {
-      var recordExists = out.guildInformation.alliance_roles.some(kvp => (kvp.role_name === roleName || kvp.alliance_id === corpID));
-      var roleExists = msg.channel.guild.roles.some(role => role.name === roleName);
-      
-      if(recordExists) {
-        throw new Error (`**Role Name** or **Alliance ID** is already registered.`);
-      } else if (!roleExists) {
-        throw new Error (`Role **${roleName}** does not exists.`);
-      } else {
-        out.guildInformation.alliance_roles.push({ "alliance_id" : allianceID, "role_name" : roleName });
-      } 
-
-      return out;
-    })
-    .then(Guild.GuildUpsert)
-    .then(modified => { if(modified) msg.channel.send(`:white_check_mark: Record added!`) })
-    .catch(err => {
-      msg.channel.send(`:x: ${err}`);
-    });
-}
-
-/**
- * Attempts to remove the alliance/role association to the guild and replies in msg.channel with the result.
- * @param {*Discordjs.Message} msg - The message which triggered this action.
- * @param {*int} allianceID - The allianceID to add.
- * @param {*string} roleName - The role name to add.
- * @param {*Discordjs.Guild} guild - The guild to remove the alliance and role from.
- */
-var RemoveAllianceFromRole = function (msg, allianceID, roleName, guild) {
-  Guild.GuildGet(guild)
-    .then(out => {
-      var recordExists = out.guildInformation.alliance_roles.some(kvp => (kvp.role_name === roleName || kvp.alliance_id === allianceID));
-
-      if(!recordExists) {
-        throw new Error (`**Role Name** or **Alliance ID** has not been registered.`);
-      } else {
-        out.guildInformation.alliance_roles = out.guildInformation.alliance_roles.filter(kvp => !(kvp.role_name === roleName || kvp.alliance_id === allianceID));
-      }
-
-      return out;
-    })
-    .then(Guild.GuildUpsert)
-    .then(modified => { if(modified) msg.channel.send(`:white_check_mark: Record removed!`) })
-    .catch(err => {
-      msg.channel.send(`:x: ${err}`);
-    });
-}
-
-/**
- * Respond in msg.channel with a list of corp role associations.
- * @param {*Discordjs.Message} msg - The message which triggered this action.
- * @param {*Discordjs.Guild} guild - The guild to display alliances for.
- */
-var DisplayCorpRoles = function(msg, guild) {
-  Guild.GuildGet(guild)
-    .then(out => {
-      var message = `Corporation role mappings:\n`
-
-      message += out.guildInformation.corp_roles
-      .map(corpRole => {
-        var role = guild.roles.find(role => role.name === corpRole.role_name);
-        return `\t${corpRole.corp_id}: ${role}`;
-      }).join(`\n`);
-      
-      msg.channel.send(`${message}`);
-    })
-    .catch(err => {
-      msg.channel.send(`:x: ${err}`);
-    });
-}
-
-/**
- * Attempts to add the corp/role association to guild and replies in msg.channel with the result.
- * @param {*Discordjs.Message} msg - The message which triggered this action.
- * @param {*int} corpID - The corpID to add.
- * @param {*string} roleName - The role name to add.
- * @param {*Discordjs.Guild} guild - The guild to add the corp and role to.
- */
-var AddCorpToRole = function (msg, corpID, roleName, guild) {
-  Guild.GuildGet(guild)
-    .then(out => {
-      var recordExists = out.guildInformation.corp_roles.some(kvp => (kvp.role_name === roleName || kvp.corp_id === corpID));
-      var roleExists = msg.channel.guild.roles.some(role => role.name === roleName);
-      
-      if(recordExists) {
-        throw new Error (`**Role Name** or **Corp ID** is already registered.`);
-      } else if (!roleExists) {
-        throw new Error (`Role **${roleName}** does not exists.`);
-      } else {
-        out.guildInformation.corp_roles.push({ "corp_id" : corpID, "role_name" : roleName });
-      } 
-
-      return out;
-    })
-    .then(Guild.GuildUpsert)
-    .then(modified => { if(modified) msg.channel.send(`:white_check_mark: Record added!`) })
-    .catch(err => {
-      msg.channel.send(`:x: ${err}`);
-    });
-}
-
-/**
- * Attempts to remove the corp/role association from the guild and replies in msg.channel with the result.
- * @param {*Discordjs.Message} msg - The message which triggered this action.
- * @param {*int} corpID - The corpID to add.
- * @param {*string} roleName - The role name to add.
- * @param {*Discordjs.Guild} guild - The guild to remove the corp and role from.
- */
-var RemoveCorpFromRole = function (msg, corpID, roleName, guild) {
-  Guild.GuildGet(guild)
-    .then(out => {
-      var recordExists = out.guildInformation.corp_roles.some(kvp => (kvp.role_name === roleName || kvp.corp_id === corpID));
-
-      if(!recordExists) {
-        throw new Error (`**Role Name** or **Corp ID** has not been registered.`);
-      } else {
-        out.guildInformation.corp_roles = out.guildInformation.corp_roles.filter(kvp => !(kvp.role_name === roleName || kvp.corp_id === corpID));
-      }
-
-      return out;
-    })
-    .then(Guild.GuildUpsert)
-    .then(modified => { if(modified) msg.channel.send(`:white_check_mark: Record removed!`) })
-    .catch(err => {
-      msg.channel.send(`:x: ${err}`);
-    });
-}
-
-/**
- * Takes an auth token and auths against ESI, then updates guildMember's name and permissions from EVE.
- * @param {*Discordjs.Message} msg - The message which triggered this action.
- * @param {*Discordjs.GuildMember} guildMember - The guildMember.
- * @param {*string} token - The auth token.
- */
-var Authorize = function (msg, guildMember, token) {
-  Api.AuthToken(guildMember, token)
-    .then(res => {
-      return [guildMember, res];
-    })
-    .spread(User.UserUpsert)
-    .then(res => {
-      Promise.join(
-        Api.VerifyToken(res),
-        Guild.GuildGet(guildMember.guild),
-        function(verifyData,guildData) {
-          return Utils.UpdateRoles(msg.channel, guildMember, verifyData, guildData);
-        }
-      );
-    })
-    .catch(err => {
-      msg.channel.send(`:x: ${err}`);
-    });
 }

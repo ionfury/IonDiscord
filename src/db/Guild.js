@@ -24,9 +24,9 @@ function getMongoConnection(url) {
  * @param {*Discord.Guild} guild - The guild to find.
  */
 function guildGet(guild) {
-  var query = { guildID: guild.id };
-
   return new Promise.using(getMongoConnection(connectionUrl), conn => {
+    var query = { guildID: guild.id };
+
     return conn.collection('guilds').findOne(query);
   });
 }
@@ -36,11 +36,11 @@ function guildGet(guild) {
  * @param {*Discord.Guild} guild - The guild to find. 
  */
 function guildUpsert(guild) {
-  var query = { guildID: guild.guildID };
-  var values = { guildID: guild.guildID, guildInformation: guild.guildInformation };
-  var options = { upsert: true };
-
   return new Promise.using(getMongoConnection(connectionUrl), conn => {
+    var query = { guildID: guild.guildID };
+    var values = { guildID: guild.guildID, guildInformation: guild.guildInformation };
+    var options = { upsert: true };
+    
     return conn.collection('guilds').updateOne(query, values, options);
   });
 }

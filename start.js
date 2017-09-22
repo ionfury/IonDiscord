@@ -2,7 +2,8 @@ const Discord = require(`discord.js`);
 const Config = require(`./config.json`);
 const Client = new Discord.Client();
 
-const commands = require(`./src/app/Commands.js`);
+const Commands = require(`./src/app/Commands.js`);
+const Guild = require(`./src/db/Guild.js`);
 
 
 Client.on('ready', () => {
@@ -27,26 +28,26 @@ Client.on('ready', () => {
 
 Client.on('guildCreate', guild => {
   var guildInformation = {
-    "corp_roles": [{"corp_id": 1091440439, "role_name": "SUAD"}],
-    "alliance_roles": [{"alliance_id": 498125261, "role_name": "TEST"}],
-    "default_role": "PUBLIC"
+    "corp_roles": [],
+    "alliance_roles": [],
+    "default_role": ""
   };
 
   console.log(`\nNew guild joined: ${guild.name} (id: ${guild.id}). This guild has ${guild.memberCount} members!`);
 
-  guildInformationUpsert(guild, guildInformation);
+  Guild.guildInformationUpsert(guild, guildInformation);
 });
 
 Client.on('guildDelete', guild => {
   console.log(`\nGuild Removed: ${guild.name} (id: ${guild.id}). This guild had ${guild.memberCount} members!`);
 
-  guildInformationDelete(guild);
+  Guild.guildInformationDelete(guild);
 });
 
 Client.on("guildMemberAdd", member => {
-  var channel = member.guild.channels.find(x => x.name === "landing_channel");
+  var channel = member.guild.channels.find(x => x.name === "landing_achannel");
 
-  channel.send(`Welcome ${member} to the ${member.guild.name} discord server.  Type !auth to authenticate with your EVE Online account to continue`);
+  channel.send(`Welcome ${member.user} to the ${member.guild.name} discord server.  Type !auth to authenticate with your EVE Online account and continue.`);
 });
 
 Client.on('message', msg => {
@@ -58,29 +59,41 @@ Client.on('message', msg => {
   console.log(`\nCommand received: ${command}, with arguments: ${args.join(', ')}, from user ${msg.author}.`);
 
   switch(command) {
+    case 'help':
+      Commands.helpCommand(msg, args);
+      break;
+
     case 'auth':
-      commands.authCommand(msg, args);
+      Commands.authCommand(msg, args);
       break;
 
     case 'refresh':
-      commands.refreshCommand(msg, args);
+      Commands.refreshCommand(msg, args);
       break;
 
     case 'purge':
-      commands.purgeCommand(msg, args);
+      Commands.purgeCommand(msg, args);
+      break;
+
+    case 'default':
+      Commands.defaultCommand(msg, args);
       break;
 
     case 'corp':
-      commands.corpCommand(msg, args);
+      Commands.corpCommand(msg, args);
       break;
 
     case 'alliance':
-      commands.allianceCommand(msg, args);
+      Commands.allianceCommand(msg, args);
       break;
 
-    case 'help':
-      commands.helpCommand(msg, args);
+    case 'notify':
+      Commands.notifyCommand(msg, args);
       break;
+
+    /*case 'subscription'
+      Commands.subscriptionCommand(msg, args);
+      break;*/
 
     default:
       msg.channel.send(`Command not recognized.`);

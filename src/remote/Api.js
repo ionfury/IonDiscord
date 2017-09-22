@@ -4,15 +4,16 @@ const Config = require(`./../../config.json`);
 
 module.exports = {
   AuthToken: authToken,
-  VerifyToken: verifyToken
+  VerifyToken: verifyToken,
+  RefreshToken: refreshToken
 }
 
 /**
- * Attempts to get a verification token.
+ * Returns an auth promise.
  * @param {*Discordjs.Message} msg - The message which triggered this action.
  * @param {*string} code - The verification token.
  */
-function authToken(guildMember, token){
+function authToken(token){
   var options = {
     method: 'POST',
     url: "https://login.eveonline.com/oauth/token",
@@ -29,8 +30,26 @@ function authToken(guildMember, token){
   return RequestPromise(options);
 }
 
+function refreshToken(record) {
+  var options = {
+    method: 'POST',
+    url: "https://login.eveonline.com/oauth/token",
+    headers: {
+      "Authorization": "Basic " + Buffer.from(Config.client_id+":"+Config.client_secret).toString('base64'),
+      "content-type": "application/json"
+    },
+    json: {
+      "grant_type":"refresh_token",
+      "refresh_token": record.data.refresh_token
+    }
+  };
+
+  return RequestPromise(options);  
+}
+
+
 /**
- * 
+ * Returns a verification promise.
  * @param {*} record 
  */
 function verifyToken(record) {
