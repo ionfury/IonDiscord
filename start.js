@@ -61,6 +61,11 @@ Client.on('message', msg => {
     msg.reply(`Please converse with me in a guild channel instead.`);
     return;
   }
+  var botAdminRole = msg.guild.roles.find(role => role.name === Config.bot_admin_role);
+  if(!botAdminRole) {
+    msg.channel.send(`Bot admin role named ${Config.bot_admin_role} must exist.`);
+    return;
+  }
 
   var args = msg.content.slice(Config.prefix.length).trim().split(/ +/g);
   var command = args.shift().toLowerCase();
