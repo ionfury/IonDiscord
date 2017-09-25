@@ -40,7 +40,7 @@ Client.on('guildCreate', guild => {
 
   console.log(`\nNew guild joined: ${guild.name} (id: ${guild.id}). This guild has ${guild.memberCount} members!`);
 
-  Guild.guildUpsert(guildRecord);
+  Guild.GuildUpsert(guildRecord);
 });
 
 Client.on('guildDelete', guild => {
