@@ -89,7 +89,8 @@ module.exports = {
           message += `\nusage:`;
           message += `\nREQUIRES: ${Config.bot_admin_role} role:`;
           message += `\n\t"${Config.prefix}default": displays the default role for users who have authenticated.`;
-          message += `\n\t"${Config.prefix}default <string>": sets the default role for users who have authenticated where <string> is the exact name of the role..`;
+          message += `\n\t"${Config.prefix}default set <string>": sets the default role for users who have authenticated where <string> is the exact name of the role..`;
+          break;
         case "notify":
           message += `\nnotify:`
           message += `\nNotifies users on the server who have not authenticated yet that they should.`;

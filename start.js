@@ -50,6 +50,7 @@ Client.on('guildDelete', guild => {
 });
 
 Client.on("guildMemberAdd", member => {
+  console.log(`\nNew Member: ${member.user} joined the guild ${member.guild.name}.`)
   member.send(`Welcome ${member.user} to the ${member.guild.name} discord server.  Type **!auth** in a channel in the server with me in it to authenticate with your EVE Online account, or try **!help**.`);
 });
 
