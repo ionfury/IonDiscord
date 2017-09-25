@@ -435,7 +435,14 @@ function authorize(msg, guildMember, token) {
         function(verifyData,guildData) {
           return updateRoles(msg.channel, guildMember, verifyData, guildData);
         }
-      );
+      )
+      .then(res => {
+        msg.channel.send(`:white_check_mark: Authenticated ${guildMember}.`)
+      })
+      .catch(err => {
+        msg.channel.send(`:x: ${guildMember}: ${err}`);
+      });
+
     })
     .catch(err => {
       msg.channel.send(`:x: ${err}`);
