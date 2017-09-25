@@ -331,10 +331,15 @@ function notifyUnauthenticatedUsers(msg, guild) {
       var unAuthenticated = members.filter(member => member.isAuthenticated == false);
 
       var message = `\nusers:`;
-      unAuthenticated.forEach(member => {
+      unAuthenticated.forEach((member, index) => {
         message += `\n\t`;
         message += member.isAuthenticated ? ':white_check_mark:' : ':x:';
         message += ` ${member}`
+
+        if(index % 20 === 0) {
+          msg.channel.send(message);
+          message = ``;
+        }
       });
 
       msg.channel.send(message);
