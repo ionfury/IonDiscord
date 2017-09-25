@@ -148,7 +148,7 @@ function displayAllianceRoles(msg, guild) {
 function addAllianceToRole(msg, allianceID, roleName, guild) {
   Guild.GuildGet(guild)
     .then(out => {
-      var recordExists = out.guildInformation.alliance_roles.some(kvp => (kvp.role_name === roleName || kvp.alliance_id === corpID));
+      var recordExists = out.guildInformation.alliance_roles.some(kvp => (kvp.role_name === roleName || kvp.alliance_id === allianceID));
       var roleExists = msg.channel.guild.roles.some(role => role.name === roleName);
       
       if(recordExists) {
