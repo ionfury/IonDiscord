@@ -9,9 +9,9 @@ module.exports = {
 }
 
 /**
- * Returns an auth promise.
- * @param {*Discordjs.Message} msg - The message which triggered this action.
- * @param {*string} code - The verification token.
+ * Authroizes a token through ESI. 
+ * @param {string} token The code.
+ * @returns A RequestPromise.
  */
 function authToken(token){
   var options = {
@@ -30,7 +30,12 @@ function authToken(token){
   return RequestPromise(options);
 }
 
-function refreshToken(record) {
+/**
+ * Refreshes a token through ESI.
+ * @param {string} token The refresh_token.
+ * @returns a RequestPromise.
+ */
+function refreshToken(token) {
   var options = {
     method: 'POST',
     url: "https://login.eveonline.com/oauth/token",
@@ -40,7 +45,7 @@ function refreshToken(record) {
     },
     json: {
       "grant_type":"refresh_token",
-      "refresh_token": record.data.refresh_token
+      "refresh_token": token
     }
   };
 
@@ -49,15 +54,16 @@ function refreshToken(record) {
 
 
 /**
- * Returns a verification promise.
- * @param {*} record 
+ * Verifies a token through ESI.
+ * @param {string} token Verification token
+ * @returns a RequestPromise.
  */
-function verifyToken(record) {
+function verifyToken(token) {
   var options = {
     method: 'GET',
     url: "https://login.eveonline.com/oauth/verify",
     headers: {
-      "authorization" : "Bearer " + record.access_token
+      "authorization" : "Bearer " + token
     }
   };
 

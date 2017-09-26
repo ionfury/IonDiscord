@@ -142,7 +142,7 @@ module.exports = {
       var guild = msg.channel.guild;
       var guildMember = guild.members.find(x => x.id === userID.toString());
 
-      Utils.Authorize(msg, guildMember, args[0]);
+      Utils.Authorize(msg, guildMember, args[0], 'auth');
     } else {
       msg.channel.send(`:x: Invalid number of arguments: ${args.length}.`);
     }
@@ -165,22 +165,25 @@ module.exports = {
     var hasRole = guildMember.roles.has(role.id);
     
     if(args.length === 0){
-      msg.channel.send(`Refreshing roles for ${guildMember}`);
+      msg.channel.send(`Refreshing info for ${guildMember}...`);
       Utils.RefreshUserRoles(msg, guildMember);
 
     } else if (args.length == 1) {
       if(!hasRole) {
         msg.channel.send(`:x:You do not have the ${role} role required to do that.`)
       } else if (args[0] === "all") {
-        msg.channel.send(`Refreshing all user roles.`);
+        msg.channel.send(`Refreshing all user info...`);
 
-        Utils.RefreshAllUserRoles(msg, guild);
+        guild.members.forEach(member => {
+          Utils.RefreshUserRoles(msg, member);
+        });
+
       } else {
         var member = msg.mentions.members.first();
         if(!member) 
           return msg.channel.send(`:x: Invalid member.`);
 
-        msg.channel.send(`Refreshing ${member}'s roles.`);
+        msg.channel.send(`Refreshing ${member}'s info...`);
         
         Utils.RefreshUserRoles(msg, member);
       }
