@@ -26,8 +26,8 @@ module.exports = {
 
 /**
  * Checks a given guildMember for a role given it's name.
- * @param {*Discordjs.GuildMember} guildMember - The guildMember to check for the role. 
- * @param {*string} roleName - The roleName
+ * @param {GuildMember} guildMember - The guildMember to check for the role. 
+ * @param {string} roleName - The roleName
  */
 function checkHasRoleByName(guildMember, roleName) {
   var guild = guildMember.guild;
@@ -38,8 +38,8 @@ function checkHasRoleByName(guildMember, roleName) {
 
 /**
  * Respond in msg.channel with a list of alliance role associations.
- * @param {*Discordjs.Message} msg - The message which triggered this action.
- * @param {*Discordjs.Guild} guild - The guild to display alliances for.
+ * @param {Message} msg - The message which triggered this action.
+ * @param {Guild} guild - The guild to display alliances for.
  */
 function displayAllianceRoles(msg, guild) {
   Guild.GuildGet(guild)
@@ -61,10 +61,10 @@ function displayAllianceRoles(msg, guild) {
 
 /**
  * Attempts to add the alliance/role association to guild and replies in msg.channel with the result.
- * @param {*Discordjs.Message} msg - The message which triggered this action.
- * @param {*int} allianceID - The allianceID to add.
- * @param {*string} roleName - The role name to add.
- * @param {*Discordjs.Guild} guild - The guild to add the alliance and role to.
+ * @param {Message} msg - The message which triggered this action.
+ * @param {int} allianceID - The allianceID to add.
+ * @param {string} roleName - The role name to add.
+ * @param {Guild} guild - The guild to add the alliance and role to.
  */
 function addAllianceToRole(msg, allianceID, roleName, guild) {
   Guild.GuildGet(guild)
@@ -91,10 +91,10 @@ function addAllianceToRole(msg, allianceID, roleName, guild) {
 
 /**
  * Attempts to remove the alliance/role association to the guild and replies in msg.channel with the result.
- * @param {*Discordjs.Message} msg - The message which triggered this action.
- * @param {*int} allianceID - The allianceID to add.
- * @param {*string} roleName - The role name to add.
- * @param {*Discordjs.Guild} guild - The guild to remove the alliance and role from.
+ * @param {Message} msg - The message which triggered this action.
+ * @param {int} allianceID - The allianceID to add.
+ * @param {string} roleName - The role name to add.
+ * @param {Guild} guild - The guild to remove the alliance and role from.
  */
 function removeAllianceFromRole(msg, allianceID, roleName, guild) {
   Guild.GuildGet(guild)
@@ -118,8 +118,8 @@ function removeAllianceFromRole(msg, allianceID, roleName, guild) {
 
 /**
  * Respond in msg.channel with a list of corp role associations.
- * @param {*Discordjs.Message} msg - The message which triggered this action.
- * @param {*Discordjs.Guild} guild - The guild to display alliances for.
+ * @param {Message} msg - The message which triggered this action.
+ * @param {Guild} guild - The guild to display alliances for.
  */
 function displayCorpRoles(msg, guild) {
   Guild.GuildGet(guild)
@@ -141,10 +141,10 @@ function displayCorpRoles(msg, guild) {
 
 /**
  * Attempts to add the corp/role association to guild and replies in msg.channel with the result.
- * @param {*Discordjs.Message} msg - The message which triggered this action.
- * @param {*int} corpID - The corpID to add.
- * @param {*string} roleName - The role name to add.
- * @param {*Discordjs.Guild} guild - The guild to add the corp and role to.
+ * @param {Message} msg - The message which triggered this action.
+ * @param {int} corpID - The corpID to add.
+ * @param {string} roleName - The role name to add.
+ * @param {Guild} guild - The guild to add the corp and role to.
  */
 function addCorpToRole(msg, corpID, roleName, guild) {
   Guild.GuildGet(guild)
@@ -171,10 +171,10 @@ function addCorpToRole(msg, corpID, roleName, guild) {
 
 /**
  * Attempts to remove the corp/role association from the guild and replies in msg.channel with the result.
- * @param {*Discordjs.Message} msg - The message which triggered this action.
- * @param {*int} corpID - The corpID to add.
- * @param {*string} roleName - The role name to add.
- * @param {*Discordjs.Guild} guild - The guild to remove the corp and role from.
+ * @param {Message} msg - The message which triggered this action.
+ * @param {int} corpID - The corpID to add.
+ * @param {string} roleName - The role name to add.
+ * @param {Guild} guild - The guild to remove the corp and role from.
  */
 function removeCorpFromRole(msg, corpID, roleName, guild) {
   Guild.GuildGet(guild)
@@ -217,9 +217,9 @@ function displayDefaultRole(msg, guild) {
 
 /**
  * Attempts to set the default role and replies in msg.channel with the result.
- * @param {*Discordjs.Message} msg - The message which triggered this action.
- * @param {*string} roleName - The role name to add.
- * @param {*Discordjs.Guild} guild - The guild to remove the corp and role from.
+ * @param {Message} msg - The message which triggered this action.
+ * @param {string} roleName - The role name to add.
+ * @param {Guild} guild - The guild to remove the corp and role from.
  */
 function setDefaultRole(msg, roleName, guild) {
   Guild.GuildGet(guild)
@@ -242,6 +242,11 @@ function setDefaultRole(msg, roleName, guild) {
     });
 }
 
+/**
+ * Notifies any unauthenticated users in the Guild and responds in msg.Channel
+ * @param {Message} msg The message.
+ * @param {Guild} guild The guild.
+ */
 function notifyUnauthenticatedUsers(msg, guild) {
   User.UsersGet(guild)
     .then(users => {
@@ -271,6 +276,11 @@ function notifyUnauthenticatedUsers(msg, guild) {
     });
 }
 
+/**
+ * Purges all roles from any unauthenticated users in guild and  responds in msg.channel. 
+ * @param {Message} msg The message.
+ * @param {Guild} guild The guild.
+ */
 function purgeUnauthenticatedUsers(msg, guild) {
   User.UsersGet(guild)
     .then(users => {
