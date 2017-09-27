@@ -198,8 +198,8 @@ function removeCorpFromRole(msg, corpID, roleName, guild) {
 
 /**
  * Respond in msg.channel with the default role.
- * @param {*Discordjs.Message} msg - The message which triggered this action.
- * @param {*Discordjs.Guild} guild - The guild to display alliances for.
+ * @param {Message} msg - The message which triggered this action.
+ * @param {Guild} guild - The guild to display alliances for.
  */
 function displayDefaultRole(msg, guild) {
   Guild.GuildGet(guild)
@@ -433,7 +433,6 @@ function updateDefaultRole(guildMember, roleName, channel) {
 
 /**
  * Parses a characterID from a string.
- * 
  * @param {json} res The json object/string containing an attribute "CharacterID".
  * @returns The characterId.
  */
