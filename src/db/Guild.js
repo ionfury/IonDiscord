@@ -3,7 +3,7 @@ const Promise = require('bluebird');
 
 Promise.promisifyAll(MongoClient);
 
-var connectionUrl = `mongodb://${Config.database_username}:${Config.database_password}@${Config.database_connection_string}`;
+var connectionUrl = `mongodb://${process.env.database_username}:${process.env.database_password}@${process.env.database_connection_string}`;
 
 module.exports = {
   GuildGet: guildGet,

@@ -17,7 +17,7 @@ function authToken(token){
     method: 'POST',
     url: "https://login.eveonline.com/oauth/token",
     headers: {
-      "authorization": "Basic " + Buffer.from(Config.client_id+":"+Config.client_secret).toString('base64'),
+      "authorization": "Basic " + Buffer.from(process.env.client_id+":"+process.env.client_secret).toString('base64'),
       "content-type": "application/json"
     },
     json: {
@@ -39,7 +39,7 @@ function refreshToken(token) {
     method: 'POST',
     url: "https://login.eveonline.com/oauth/token",
     headers: {
-      "Authorization": "Basic " + Buffer.from(Config.client_id+":"+Config.client_secret).toString('base64'),
+      "Authorization": "Basic " + Buffer.from(process.env.client_id+":"+process.env.client_secret).toString('base64'),
       "content-type": "application/json"
     },
     json: {
