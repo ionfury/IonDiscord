@@ -3,8 +3,6 @@ const Promise = require('bluebird');
 
 const Utils = require (`./Utils.js`);
 
-const Config = require(`./../../config.json`);
-
 module.exports = {
   /*
   * helpCommand
@@ -14,7 +12,7 @@ module.exports = {
   * !help
   */
   helpCommand: function(msg, args) {
-    var hasAdmin = Utils.CheckHasRoleByName(msg.member, Config.bot_admin_role)
+    var hasAdmin = Utils.CheckHasRoleByName(msg.member, process.env.bot_admin_role)
 
     var message = ``;
     if(args.length == 1) {
@@ -28,75 +26,75 @@ module.exports = {
           message += `\n\thandles authenticating a discord user to an EVE online account.`;
           message += `\n`;
           message += `\nusage:`;
-          message += `\n\t"${Config.prefix}auth": displays the steps to authenticate.`;
-          message += `\n\t"${Config.prefix}auth <string>": attempts to authenticate with <string>.`;
+          message += `\n\t"${process.env.prefix}auth": displays the steps to authenticate.`;
+          message += `\n\t"${process.env.prefix}auth <string>": attempts to authenticate with <string>.`;
           break;
         case "refresh":
           message += `\nrefresh:`;
           message += `\n\thandles refreshing a user's information once they have already authenticated on this server.`;
           message += `\n`;
           message += `\nusage:`;
-          message += `\n\t"${Config.prefix}refresh": attempts to refresh user details with existing auth token.`;
-          message += `\nREQUIRES: ${Config.bot_admin_role} role:`;
-          message += `\n\t"${Config.prefix}refresh <@user>": attempts to refresh <@user>'s details with their existing auth token.`;
+          message += `\n\t"${process.env.prefix}refresh": attempts to refresh user details with existing auth token.`;
+          message += `\nREQUIRES: ${process.env.bot_admin_role} role:`;
+          message += `\n\t"${process.env.prefix}refresh <@user>": attempts to refresh <@user>'s details with their existing auth token.`;
           break;
         case "purge":
           message += `\npurge:`
           message += `\n\tstrips ALL ROLES from users who have not yet authenticated.`;
           message += `\n`;
           message += `\nusage:`;
-          message += `\nREQUIRES: ${Config.bot_admin_role} role:`;
-          message += `\n\t"${Config.prefix}purge": strips ALL roles from users who have no auth information.`;
+          message += `\nREQUIRES: ${process.env.bot_admin_role} role:`;
+          message += `\n\t"${process.env.prefix}purge": strips ALL roles from users who have no auth information.`;
           break;
         case "corp":
           message += `\ncorp:`;
           message += `\n\thandles display & configuration of relationships between EVE corporations and discord roles.`;
           message += `\n`;
           message += `\nusage:`;
-          message += `\nREQUIRES: ${Config.bot_admin_role} role:`;
-          message += `\n\t"${Config.prefix}corp": displays list of configured corporation id: role mappings`;
-          message += `\n\t"${Config.prefix}corp add <int> <string>": adds a corp-role relationship where <int> is the corp key and <string> is the exact name of the role.`;
-          message += `\n\t"${Config.prefix}corp remove <int> <string>": removes a corp-role relationship where <int> is the corp key and <string> is the exact name of the role.`;
+          message += `\nREQUIRES: ${process.env.bot_admin_role} role:`;
+          message += `\n\t"${process.env.prefix}corp": displays list of configured corporation id: role mappings`;
+          message += `\n\t"${process.env.prefix}corp add <int> <string>": adds a corp-role relationship where <int> is the corp key and <string> is the exact name of the role.`;
+          message += `\n\t"${process.env.prefix}corp remove <int> <string>": removes a corp-role relationship where <int> is the corp key and <string> is the exact name of the role.`;
           message += `\n`;
           message += `\nTo find a corp key:`;
           message += `\n\t1. Open the corp's zkill page and look in the url.`;
           message += `\n\t2. the corp's key will be: zkillboard.com/corporation/<key>/`
           message += `\n`;
           message += `\nEXAMPLE:`;
-          message += `\n\t${Config.prefix}corp add 1091440439 SUAD`;
+          message += `\n\t${process.env.prefix}corp add 1091440439 SUAD`;
           break;
         case "alliance":
           message += `\nalliance:`;
           message += `\n\thandles display & configuration of relationships between EVE alliances and discord roles.`;
           message += `\n`;
           message += `\nusage:`;
-          message += `\nREQUIRES: ${Config.bot_admin_role} role:`;
-          message += `\n\t"${Config.prefix}alliance": displays list of configured alliance id: role mappings`;
-          message += `\n\t"${Config.prefix}alliance add <int> <string>": adds a alliance-role relationship where <int> is the corp key and <string> is the exact name of the role.`;
-          message += `\n\t"${Config.prefix}alliance remove <int> <string>": removes a alliance-role relationship where <int> is the corp key and <string> is the exact name of the role.`;
+          message += `\nREQUIRES: ${process.env.bot_admin_role} role:`;
+          message += `\n\t"${process.env.prefix}alliance": displays list of configured alliance id: role mappings`;
+          message += `\n\t"${process.env.prefix}alliance add <int> <string>": adds a alliance-role relationship where <int> is the corp key and <string> is the exact name of the role.`;
+          message += `\n\t"${process.env.prefix}alliance remove <int> <string>": removes a alliance-role relationship where <int> is the corp key and <string> is the exact name of the role.`;
           message += `\n`;
           message += `\nTo find an alliance key:`;
           message += `\n\t1. Open the alliance's zkill page and look in the url.`;
           message += `\n\t2. The alliance's key will be: zkillboard.com/alliance/<key>/`
           message += `\n`;
           message += `\nEXAMPLE:`;
-          message += `\n\t${Config.prefix}alliance add 498125261 TEST`;
+          message += `\n\t${process.env.prefix}alliance add 498125261 TEST`;
           break;
         case "default":
           message += `\ndefault:`;
           message += `\n\thandles configuration of the default role for users who have authenticated.`;
           message += `\n`;
           message += `\nusage:`;
-          message += `\nREQUIRES: ${Config.bot_admin_role} role:`;
-          message += `\n\t"${Config.prefix}default": displays the default role for users who have authenticated.`;
-          message += `\n\t"${Config.prefix}default set <string>": sets the default role for users who have authenticated where <string> is the exact name of the role..`;
+          message += `\nREQUIRES: ${process.env.bot_admin_role} role:`;
+          message += `\n\t"${process.env.prefix}default": displays the default role for users who have authenticated.`;
+          message += `\n\t"${process.env.prefix}default set <string>": sets the default role for users who have authenticated where <string> is the exact name of the role..`;
           break;
         case "notify":
           message += `\nnotify:`
           message += `\nNotifies users on the server who have not authenticated yet that they should.`;
           message += `\n`;
           message += `\nusage:`;
-          message += `\n\t"${Config.prefix}notify" mentions all users who have not authenticated.`;
+          message += `\n\t"${process.env.prefix}notify" mentions all users who have not authenticated.`;
           break;
         case "subscription":
           message += `\nNOT YET IMPLEMENTED:`
@@ -135,7 +133,7 @@ module.exports = {
   */
   authCommand: function(msg, args){
     if(args.length == 0) {
-      var address = Config.auth_url + "?sender=" + msg.channel.guild.name
+      var address = process.env.auth_url + "?sender=" + msg.channel.guild.name
       msg.channel.send(`\n1. Click link: ${address} \n2.Click button. \n3. Sign into Eve if you haven't already, pick a character, then click the button. \n4. Type !auth <string> on the next page into this channel.`);
     }else if(args.length == 1) {
       var userID = msg.author.id;
@@ -161,7 +159,7 @@ module.exports = {
     var user = msg.author;
     var guild = msg.channel.guild;
     var guildMember = guild.members.find(x => x.id === user.id);
-    var role = guild.roles.find(x => x.name === Config.bot_admin_role);
+    var role = guild.roles.find(x => x.name === process.env.bot_admin_role);
     var hasRole = guildMember.roles.has(role.id);
     
     if(args.length === 0){
@@ -198,15 +196,15 @@ module.exports = {
   * args: the arguments passed into the message
   * 
   * usage:
-  * !purge - purges all users without the ${Config.default_role} role.
-  * !purge @user - purge @users if they do not have the ${Config.default_role} role.
+  * !purge - purges all users without the ${process.env.default_role} role.
+  * !purge @user - purge @users if they do not have the ${process.env.default_role} role.
   */
   purgeCommand: function(msg, args) {
     var user = msg.author;
     var guild = msg.channel.guild;
     var guildMember = guild.members.find(x => x.id === user.id);
 
-    if(!Utils.CheckHasRoleByName(guildMember, Config.bot_admin_role)) {
+    if(!Utils.CheckHasRoleByName(guildMember, process.env.bot_admin_role)) {
       msg.channel.send(`You do not have the required roles to perform this command.`);
       return;
     }
@@ -235,7 +233,7 @@ module.exports = {
     var guild = msg.channel.guild;
     var guildMember = guild.members.find(x => x.id === user.id);
 
-    if(!Utils.CheckHasRoleByName(guildMember, Config.bot_admin_role)) {
+    if(!Utils.CheckHasRoleByName(guildMember, process.env.bot_admin_role)) {
       msg.channel.send(`You do not have the required roles to perform this command.`);
       return;
     }
@@ -277,7 +275,7 @@ module.exports = {
     var guild = msg.channel.guild;
     var guildMember = guild.members.find(x => x.id === user.id);
 
-    if(!Utils.CheckHasRoleByName(guildMember, Config.bot_admin_role)) {
+    if(!Utils.CheckHasRoleByName(guildMember, process.env.bot_admin_role)) {
       msg.channel.send(`You do not have the required roles to perform this command.`);
       return;
     }
@@ -309,7 +307,7 @@ module.exports = {
     var guild = msg.channel.guild;
     var guildMember = guild.members.find(x => x.id === user.id);
 
-    if(!Utils.CheckHasRoleByName(guildMember, Config.bot_admin_role)) {
+    if(!Utils.CheckHasRoleByName(guildMember, process.env.bot_admin_role)) {
       msg.channel.send(`You do not have the required roles to perform this command.`);
       return;
     }
@@ -327,7 +325,7 @@ module.exports = {
     var guild = msg.channel.guild;
     var guildMember = guild.members.find(x => x.id === user.id);
 
-    if(!Utils.CheckHasRoleByName(guildMember, Config.bot_admin_role)) {
+    if(!Utils.CheckHasRoleByName(guildMember, process.env.bot_admin_role)) {
       msg.channel.send(`You do not have the required roles to perform this command.`);
       return;
     }
