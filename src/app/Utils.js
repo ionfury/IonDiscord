@@ -6,8 +6,6 @@ const Guild = require(`../db/Guild.js`);
 const User = require(`../db/User.js`);
 const Api = require(`../remote/Api.js`);
 
-const Config = require(`./../../config.json`);
-
 module.exports = {
   AddAllianceToRole: addAllianceToRole,
   AddCorpToRole: addCorpToRole,

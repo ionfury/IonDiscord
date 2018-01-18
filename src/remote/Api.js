@@ -1,6 +1,5 @@
 const RequestPromise = require('request-promise');
 const User = require(`../db/User.js`);
-const Config = require(`./../../config.json`);
 
 module.exports = {
   AuthToken: authToken,

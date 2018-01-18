@@ -1,6 +1,6 @@
 const MongoClient = require('mongodb').MongoClient;
 const Promise = require('bluebird');
-const Config = require(`./../../config.json`);
+
 Promise.promisifyAll(MongoClient);
 
 var connectionUrl = `mongodb://${Config.database_username}:${Config.database_password}@${Config.database_connection_string}`;
