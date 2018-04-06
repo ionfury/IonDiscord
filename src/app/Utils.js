@@ -21,6 +21,7 @@ module.exports = {
   NotifyUnauthenticatedUsers: notifyUnauthenticatedUsers,
   Purge: purgeUnauthenticatedUsers,
   SetDefaultRole: setDefaultRole,
+  GetAvailableRoles: getAvailableRoles
 };
 
 /**

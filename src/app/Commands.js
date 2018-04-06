@@ -197,6 +197,23 @@ module.exports = {
     }
   },
 
+  rolesCommand: function(msg, args) {
+    var user = msg.author;
+    var guild = msg.channel.guild;
+    var guild = msg.channel.guild;
+    var guildMember = guild.members.find(x => x.id === user.id);
+    var role = guild.roles.find(x => x.name === process.env.bot_admin_role);
+    var hasRole = guildMember.roles.has(role.id);
+    if (args.length === 0) {
+      msg.channel.send(`Getting available roles...`);
+
+      Utils.GetAvailableRoles(msg, guild);
+    } else {
+      msg.channel.send(`Invalid number of arguments: ${args.length}.`);
+    }
+
+  },
+
 /**
   * purgeCommand
   * msg: the message object which initiated this command
