@@ -96,6 +96,13 @@ module.exports = {
           message += `\nusage:`;
           message += `\n\t"${process.env.prefix}notify" mentions all users who have not authenticated.`;
           break;
+        case "roles":
+          message += `\nroles:`
+          message +=`\nAdd or removes yourself from available roles on the server.`;
+          message += `\n`;
+          message += `\nusage:`;
+          message += `\n\t`
+          break;
         case "subscription":
           message += `\nNOT YET IMPLEMENTED:`
           break;
