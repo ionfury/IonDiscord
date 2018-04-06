@@ -20,27 +20,27 @@ function getMongoConnection(url) {
     .disposer(conn => conn.close());
 }
 
-function roleGet(role){
+function roleGet(guild, role){
   return new Promise.using(getMongoConnection(connectionUrl), conn => {
-    var query = { roleID : role.id };
-    var values = { roleID: role.id, roleName: role.name };
+    var query = { guildID: guild.id, roleID : role.id };
+    var values = { guildID: guild.id, roleID: role.id, roleName: role.name };
     
     return conn.collection('roles').findOne(query);
   });
 }
 
-function rolesGet() {
+function rolesGet(guild) {
   return new Promise.using(getMongoConnection(connectionUrl), conn => {
-    var query = {};
+    var query = { guildID: guild.id };
     return conn.collection('roles').find(query).toArray();
   });
 }
 
 
-function roleUpsert(role){
+function roleUpsert(guild, role){
   return new Promise.using(getMongoConnection(connectionUrl), conn => {
-    var query = { roleID: role.id };
-    var values = { roleID: role.id, roleName: role.name, rolDependency: role.id };
+    var query = { guildID: guild.id, roleID: role.id };
+    var values = { guildID: guild.id, roleID: role.id, roleName: role.name, rolDependency: role.id };
     var options = { upsert: true };
 
     return conn.collection('roles').updateOne(query, values, options);

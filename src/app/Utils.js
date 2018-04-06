@@ -4,6 +4,7 @@ const Promise = require('bluebird');
 
 const Guild = require(`../db/Guild.js`);
 const User = require(`../db/User.js`);
+const Roles = require(`../db/Roles.js`);
 const Api = require(`../remote/Api.js`);
 
 module.exports = {
@@ -165,6 +166,25 @@ function addCorpToRole(msg, corpID, roleName, guild) {
     .catch(err => {
       msg.channel.send(`:x: ${err}`);
     });
+}
+
+
+function getAvailableRoles(msg, guild) {
+  Roles.RolesGet(guild)
+    .then(out => {
+      var message = `Available roles: \n`;
+
+      message += out.map(role => {
+        var roleTag = guild.roles.find(guildRole => guildRole.name === role.name);
+        var dependentRoleTag = guild.roles.find(guildRole => guildRole.name === role.dependentName);
+        return `\t${role.name}: ${roleTag}, requires ${depndentRoleTag || 'none'}`;
+      }).join(`\n`);
+
+      msg.channel.send(`${message}`);
+    })
+    .catch(err => {
+      msg.channel.send(`:x: ${err}`);
+    })
 }
 
 /**
@@ -441,3 +461,6 @@ function parseCharacterID(res) {
   characterID = res.CharacterID;
   return res.CharacterID;
 }
+
+
+
