@@ -1,5 +1,11 @@
 const Discord = require(`discord.js`);
-const ESI = require('eve-swagger');
+const ESI1 = require('eve-swagger');
+let ESI = ESI1({
+  service: 'https://esi.evetech.net',
+  source: 'tranquility',
+  language: 'en-us',
+  timeout: 6000
+});
 const Promise = require('bluebird');
 
 const Guild = require(`../db/Guild.js`);
