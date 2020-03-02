@@ -1,0 +1,17 @@
+name: Publish Docker
+on: [push]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@master
+    - uses: azure/container-actions/docker-login@master
+      name: Publish to Registry
+      with:
+        login-server: ionfuryacr.azurecr.io
+        username: ${{ secrets.REGISTRY_USERNAME }}
+        password: ${{ secrets.REGISTRY_PASSWORD }}
+
+    - run: |
+        docker build . -t ionfuryacr.azurecr.io/iondiscord:${GITHUB_REF##*/}-${{ github.sha }}
+        docker push ionfuryacr.azurecr.io/iondiscord:${GITHUB_REF##*/}-${{ github.sha }}
